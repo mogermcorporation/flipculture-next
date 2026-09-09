@@ -91,13 +91,9 @@ export default function HomeClient() {
     () => [...consumerDeals].sort((a, b) => parseFloat(a.price.value) - parseFloat(b.price.value)).slice(0, 4),
     [consumerDeals]
   );
-  const catalog = useMemo(() => {
-    if (submitted) {
-      const q = submitted.toLowerCase();
-      return consumerDeals.filter((d) => d.title.toLowerCase().includes(q));
-    }
-    return consumerDeals.filter((d) => listingMatchesCategory(d.title, d.category, category));
-  }, [consumerDeals, category, submitted]);
+  const catalog = submitted
+    ? consumerDeals.filter((d) => d.title.toLowerCase().includes(submitted.toLowerCase()))
+    : consumerDeals.filter((d) => d.category === category && listingMatchesCategory(d.title, d.category, category));
 
   const cohortDeals = useMemo(() => {
     const street = consumerDeals.filter((d) => listingMatchesCategory(d.title, d.category, "streetwear"));
@@ -324,10 +320,17 @@ export default function HomeClient() {
             ))}
           </div>
         ) : catalog.length ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {catalog.map((deal) => (
-              <DealCard key={deal.itemId} deal={deal} metric="bin" />
-            ))}
+          <div
+            key={`${category}-${submitted || "wall"}`}
+            data-wall={submitted ? "search" : category}
+            data-count={catalog.length}
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+          >
+            {catalog
+              .filter((deal) => (submitted ? true : deal.category === category))
+              .map((deal) => (
+                <DealCard key={deal.itemId} deal={deal} metric="bin" />
+              ))}
           </div>
         ) : (
           <div className="text-center border border-dashed border-neutral-800 rounded-3xl py-16 px-6">

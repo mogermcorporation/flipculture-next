@@ -64,20 +64,36 @@ export function classifyListing(title: string, rawCategory?: string | null): Cat
       hasMm ||
       /submariner|gmt[- ]master|datejust|daytona|nautilus|royal oak|box and papers/i.test(t));
 
-  if (watch && !garment && !footwear && !collectible) return "watches";
-  if (collectible && !footwear) return "collectibles";
-  if (garment && !footwear) return "streetwear";
+  if (watch && !garment && !footwear && !collectible) {
+    return "watches";
+  }
+  if (collectible && !footwear) {
+    return "collectibles";
+  }
+  if (garment && !footwear) {
+    return "streetwear";
+  }
   if (footwear && !watch && !collectible) {
-    if (garment && !/\b(sneaker|dunk|yeezy|kobe|sz\s?\d|size\s?\d)\b/i.test(t)) return "streetwear";
+    if (garment && !/\b(sneaker|dunk|yeezy|kobe|sz\s?\d|size\s?\d)\b/i.test(t)) {
+      return "streetwear";
+    }
     return "sneakers";
   }
-  if (apparel && !footwear && !watch && !collectible) return "streetwear";
-
-  if (alias === "sneakers" && !watch && !collectible && !apparel) return "sneakers";
-  if (alias === "streetwear" && !watch && !footwear && !collectible) return "streetwear";
-  if (alias === "collectibles" && !watch && !footwear && !apparel) return "collectibles";
-  if (alias === "watches" && watch) return "watches";
-
+  if (apparel && !footwear && !watch && !collectible) {
+    return "streetwear";
+  }
+  if (alias === "sneakers" && !watch && !collectible && !apparel) {
+    return "sneakers";
+  }
+  if (alias === "streetwear" && !watch && !footwear && !collectible) {
+    return "streetwear";
+  }
+  if (alias === "collectibles" && !watch && !footwear && !apparel) {
+    return "collectibles";
+  }
+  if (alias === "watches" && watch) {
+    return "watches";
+  }
   return null;
 }
 
