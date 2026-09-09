@@ -111,7 +111,7 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T | null> 
 }
 
 async function fetchCohort(table: string): Promise<CohortRow[]> {
-  const url = `${SUPABASE_URL}/rest/v1/${table}?select=ebay_id,title,model,kind,price,sold_avg,discount_pct,image_url,product_url,affiliate_url,authenticity_guarantee,ended,cohort,condition,featured,hero_role&ended=eq.false`;
+  const url = `${SUPABASE_URL}/rest/v1/${table}?select=ebay_id,title,model,kind,price,sold_avg,discount_pct,image_url,product_url,affiliate_url,authenticity_guarantee,ended,cohort,condition,featured,hero_role,category&ended=eq.false`;
   const body = await fetchJson<CohortRow[]>(url, {
     headers: {
       apikey: SUPABASE_ANON,
@@ -139,7 +139,7 @@ export async function loadAllDeals(): Promise<Deal[]> {
         image: row.image_url,
         affiliate: row.affiliate_url,
         product: row.product_url,
-        category: row.kind || "sneakers",
+        category: row.category || "sneakers",
         featured: isFeaturedRow(row),
         cohort: row.cohort || undefined,
         heroRole: row.hero_role,
