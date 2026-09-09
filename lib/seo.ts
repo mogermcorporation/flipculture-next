@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { POSTS } from "@/lib/posts";
 import type { Deal } from "@/lib/types";
 
 export const SITE_URL = "https://flipcultureusa.vercel.app";
@@ -74,6 +75,7 @@ export function itemListLd(name: string, deals: Deal[]) {
 export const SITEMAP_PATHS = [
   "/",
   "/blog",
+  ...POSTS.map((post) => `/blog/${post.slug}`),
   "/streetwear",
   "/streetwear/denim",
   "/streetwear/denim/true-religion",

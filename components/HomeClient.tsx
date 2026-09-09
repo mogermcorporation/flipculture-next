@@ -19,6 +19,7 @@ import {
   listingWatchTier,
   mixHero
 } from "@/lib/merchandise";
+import { latestPosts } from "@/lib/posts";
 import type { Deal } from "@/lib/types";
 
 const CATEGORIES: { id: CatalogCategory; label: string }[] = [
@@ -47,27 +48,22 @@ const SHARE = encodeURIComponent(SITE);
 const SHARE_TEXT = encodeURIComponent("Flip Culture — sneakers, streetwear, collectibles, watches.");
 
 export default function HomeClient() {
-  const [featured, setFeatured] = useState<Deal[]>([]);
   const [allDeals, setAllDeals] = useState<Deal[]>([]);
   const [category, setCategory] = useState<CatalogCategory>("sneakers");
   const [rail, setRail] = useState<string>("all");
   const [query, setQuery] = useState("");
   const [submitted, setSubmitted] = useState("");
   const [loading, setLoading] = useState(true);
+  const journal = latestPosts(3);
 
   useEffect(() => {
     (async () => {
       try {
-        const [featRes, allRes] = await Promise.all([
-          fetch("/api/deals?featured=true", { cache: "no-store" }),
-          fetch("/api/deals", { cache: "no-store" })
-        ]);
-        const featJson = await featRes.json();
+        const allRes = await fetch("/api/deals", { cache: "no-store" });
         const allJson = await allRes.json();
-        if (Array.isArray(featJson)) setFeatured(featJson.slice(0, 3));
         if (Array.isArray(allJson)) setAllDeals(allJson);
       } catch (err) {
-        console.error("Failed to load featured deals:", err);
+        console.error("Failed to load catalog deals:", err);
       } finally {
         setLoading(false);
       }
@@ -209,17 +205,38 @@ export default function HomeClient() {
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
             <div>
               <span className="text-purple-400 font-bold text-xs uppercase tracking-widest block mb-1">
-                PROMOTED SELECTION
+                From the journal
               </span>
-              <h2 className="text-3xl font-black tracking-tight flex items-center gap-3">The Vault Top 3 Drops</h2>
+              <h2 className="text-3xl font-black tracking-tight">Latest from the blog</h2>
             </div>
             <p className="text-neutral-400 text-xs max-w-md">
-              Hand-picked verified grails with real-time valuation metrics. Updated daily.
+              Legit checks, BIN floors, and sourcing notes. Internal reads — not marketplace ads.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featured.map((deal, i) => (
-              <DealCard key={deal.itemId} deal={deal} vaultIndex={i + 1} />
+            {journal.map((post) => (
+              <article
+                key={post.slug}
+                className="group bg-neutral-900/90 border border-neutral-800 rounded-2xl p-4 hover:border-purple-500/50 transition"
+              >
+                <Link href={`/blog/${post.slug}`} className="block">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={post.image}
+                    alt={post.imageAlt}
+                    width={400}
+                    height={225}
+                    className="w-full aspect-video object-cover rounded-xl border border-neutral-800 mb-4"
+                  />
+                  <p className="text-[10px] uppercase tracking-widest text-purple-400 font-bold">
+                    {post.tag} · {post.dateLabel}
+                  </p>
+                  <h3 className="text-base font-black mt-2 mb-2 leading-snug group-hover:text-purple-300 transition">
+                    {post.title}
+                  </h3>
+                  <p className="text-neutral-400 text-xs leading-relaxed line-clamp-3">{post.excerpt}</p>
+                </Link>
+              </article>
             ))}
           </div>
         </section>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import { latestPosts } from "@/lib/posts";
 import { pageMeta } from "@/lib/seo";
 
 export const metadata: Metadata = pageMeta({
@@ -11,31 +12,8 @@ export const metadata: Metadata = pageMeta({
     "Deep dives into flipping Air Jordans, spotting vintage streetwear, sports cards, and watch market floors."
 });
 
-const POSTS = [
-  {
-    tag: "Sneaker Legit Checks",
-    date: "August 2026",
-    title: "How to Spot Fake Air Jordan 1 Retros in 2026: The Complete Legit Check Guide",
-    excerpt:
-      "Crucial details on leather texture, heel shape, hourglass silhouettes, and Wings logo embossing before you buy or flip high-value pairs."
-  },
-  {
-    tag: "Watch Floors",
-    date: "September 2026",
-    title: "Rolex Sub vs Datejust vs Vintage Daytona: What the BIN Board Is Actually Paying",
-    excerpt:
-      "How we separate complete watches from parts, and why Patek Nautilus, AP Royal Oak, and Richard Mille sit on the most-valuable wall."
-  },
-  {
-    tag: "Sourcing Strategy",
-    date: "August 2026",
-    title: "Sourcing Vintage Streetwear & Grails: Thrift to Marketplace Blueprint",
-    excerpt:
-      "How to evaluate tag dates, single-stitch construction, and authentic wear when flipping 90s apparel and hype streetwear."
-  }
-];
-
 export default function BlogPage() {
+  const posts = latestPosts(3);
   return (
     <div className="min-h-screen bg-neutral-950 text-white">
       <SiteHeader brandAs="p" />
@@ -48,13 +26,23 @@ export default function BlogPage() {
           Market trends, legit checks, and sourcing breakdowns for sneakers, streetwear, collectibles, and watches.
         </p>
         <div className="space-y-8">
-          {POSTS.map((post) => (
-            <article key={post.title} className="border border-neutral-800 rounded-2xl p-6 bg-neutral-900/50">
-              <p className="text-[10px] uppercase tracking-widest text-purple-400 font-bold">
-                {post.tag} · {post.date}
-              </p>
-              <h2 className="text-xl font-black mt-2 mb-3">{post.title}</h2>
-              <p className="text-neutral-400 text-sm">{post.excerpt}</p>
+          {posts.map((post) => (
+            <article key={post.slug} className="border border-neutral-800 rounded-2xl p-6 bg-neutral-900/50">
+              <Link href={`/blog/${post.slug}`} className="block group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={post.image}
+                  alt={post.imageAlt}
+                  width={640}
+                  height={360}
+                  className="w-full aspect-video object-cover rounded-xl border border-neutral-800 mb-4"
+                />
+                <p className="text-[10px] uppercase tracking-widest text-purple-400 font-bold">
+                  {post.tag} · {post.dateLabel}
+                </p>
+                <h2 className="text-xl font-black mt-2 mb-3 group-hover:text-purple-300 transition">{post.title}</h2>
+                <p className="text-neutral-400 text-sm">{post.excerpt}</p>
+              </Link>
             </article>
           ))}
         </div>
