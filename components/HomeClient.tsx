@@ -54,7 +54,6 @@ const SHARE_TEXT = encodeURIComponent("Flip Culture — sneakers, streetwear, co
 export default function HomeClient() {
   const [featured, setFeatured] = useState<Deal[]>([]);
   const [allDeals, setAllDeals] = useState<Deal[]>([]);
-  const [catalog, setCatalog] = useState<Deal[]>([]);
   const [category, setCategory] = useState<CatalogCategory>("sneakers");
   const [query, setQuery] = useState("");
   const [submitted, setSubmitted] = useState("");
@@ -64,39 +63,21 @@ export default function HomeClient() {
   useEffect(() => {
     (async () => {
       try {
-        const [featRes, allRes] = await Promise.all([fetch("/api/deals?featured=true"), fetch("/api/deals")]);
+        const [featRes, allRes] = await Promise.all([
+          fetch("/api/deals?featured=true", { cache: "no-store" }),
+          fetch("/api/deals", { cache: "no-store" })
+        ]);
         const featJson = await featRes.json();
         const allJson = await allRes.json();
         if (Array.isArray(featJson)) setFeatured(featJson.slice(0, 3));
         if (Array.isArray(allJson)) setAllDeals(allJson);
       } catch (err) {
         console.error("Failed to load featured deals:", err);
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const url = submitted
-          ? `/api/deals?q=${encodeURIComponent(submitted)}`
-          : `/api/deals?category=${category}`;
-        const res = await fetch(url);
-        const json = await res.json();
-        const rows: Deal[] = Array.isArray(json) ? json : [];
-        const wall = submitted
-          ? rows.filter((d) => classifyListing(d.title, d.category))
-          : rows.filter((d) => listingMatchesCategory(d.title, d.category, category));
-        setCatalog(wall);
-      } catch (err) {
-        console.error("Failed to load category deals:", err);
-        setCatalog([]);
       } finally {
         setLoading(false);
       }
     })();
-  }, [category, submitted]);
+  }, []);
 
   const consumerDeals = useMemo(
     () => allDeals.filter((d) => Boolean(classifyListing(d.title, d.category))),
@@ -110,6 +91,14 @@ export default function HomeClient() {
     () => [...consumerDeals].sort((a, b) => parseFloat(a.price.value) - parseFloat(b.price.value)).slice(0, 4),
     [consumerDeals]
   );
+  const catalog = useMemo(() => {
+    if (submitted) {
+      const q = submitted.toLowerCase();
+      return consumerDeals.filter((d) => d.title.toLowerCase().includes(q));
+    }
+    return consumerDeals.filter((d) => listingMatchesCategory(d.title, d.category, category));
+  }, [consumerDeals, category, submitted]);
+
   const cohortDeals = useMemo(() => {
     const street = consumerDeals.filter((d) => listingMatchesCategory(d.title, d.category, "streetwear"));
     const rows = (street.length ? street : consumerDeals).filter((d) => !d.cohort || d.cohort === cohort);
