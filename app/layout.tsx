@@ -25,7 +25,8 @@ export const metadata: Metadata = {
     "Audemars Piguet",
     "Yeezy"
   ],
-  robots: { index: true, follow: true }
+  robots: { index: true, follow: true },
+  other: { "p:domain_verify": "f3dd95d73b9d9d5265bfb675d84b2cfd" }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
