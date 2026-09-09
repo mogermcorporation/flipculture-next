@@ -47,20 +47,31 @@ export function classifyListing(title: string, rawCategory?: string | null): Cat
   const alias = API_ALIAS[norm(rawCategory)];
   if (alias === "drop") return null;
 
-  const apparel = APPAREL_SIGNAL.test(t);
+  const garment =
+    /\b(hoodie|hooded|t-shirt|\btee\b|crewneck|sweatshirt|jacket|parka|denim|jeans|pants|shorts|\bshirt\b|apparel|graphic tee)\b/i.test(
+      t
+    );
+  const apparel = garment || APPAREL_SIGNAL.test(t);
   const footwear = FOOTWEAR_SIGNAL.test(t);
   const collectible = COLLECTIBLE_SIGNAL.test(t);
   const hasMm = /\b\d{2}\s*mm\b/i.test(t);
   const hasWatchWord = /\bwatch(?:es)?\b/i.test(t);
-  const watchPart =
-    WATCH_PARTS.test(t) || (/\bbracelet\b/i.test(t) && !hasMm);
-  const watch = WATCH_SIGNAL.test(t) && !watchPart && (hasWatchWord || hasMm || /submariner|gmt[- ]master|datejust|daytona|nautilus|royal oak|box and papers/i.test(t));
+  const watchPart = WATCH_PARTS.test(t) || (/\bbracelet\b/i.test(t) && !hasMm);
+  const watch =
+    WATCH_SIGNAL.test(t) &&
+    !watchPart &&
+    (hasWatchWord ||
+      hasMm ||
+      /submariner|gmt[- ]master|datejust|daytona|nautilus|royal oak|box and papers/i.test(t));
 
-  if (watch && !apparel && !footwear && !collectible) return "watches";
+  if (watch && !garment && !footwear && !collectible) return "watches";
   if (collectible && !footwear) return "collectibles";
-  if (apparel && !footwear) return "streetwear";
-  if (footwear && !apparel && !watch && !collectible) return "sneakers";
-  if (apparel && footwear) return "streetwear";
+  if (garment && !footwear) return "streetwear";
+  if (footwear && !watch && !collectible) {
+    if (garment && !/\b(sneaker|dunk|yeezy|kobe|sz\s?\d|size\s?\d)\b/i.test(t)) return "streetwear";
+    return "sneakers";
+  }
+  if (apparel && !footwear && !watch && !collectible) return "streetwear";
 
   if (alias === "sneakers" && !watch && !collectible && !apparel) return "sneakers";
   if (alias === "streetwear" && !watch && !footwear && !collectible) return "streetwear";
