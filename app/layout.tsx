@@ -3,7 +3,7 @@ import JsonLd from "@/components/JsonLd";
 import { DEFAULT_DESC, DEFAULT_TITLE, organizationLd, pageMeta } from "@/lib/seo";
 import "./globals.css";
 
-const GA_ID = "G-SQVTLYLQ6Q";
+const GA_ID = "G-B61Q45GJTS";
 
 export const metadata: Metadata = {
   ...pageMeta({
