@@ -34,6 +34,7 @@ export type CohortRow = {
   title: string;
   model?: string | null;
   kind?: string | null;
+  category?: string | null;
   price?: number | string | null;
   sold_avg?: number | string | null;
   discount_pct?: number | string | null;
