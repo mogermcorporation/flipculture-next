@@ -2,116 +2,60 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { withEpn, imageUrl } from "@/lib/epn";
+import DealCard from "@/components/DealCard";
+import VipNewsletter from "@/components/VipNewsletter";
+import { classifyListing, listingMatchesCategory, type CatalogCategory } from "@/lib/classify";
 import type { Deal } from "@/lib/types";
 
-const CATEGORIES = [
+const CATEGORIES: { id: CatalogCategory; label: string }[] = [
   { id: "sneakers", label: "Sneakers" },
   { id: "streetwear", label: "Streetwear" },
-  { id: "laptops", label: "Laptops" },
-  { id: "handhelds", label: "Handhelds" },
-  { id: "battlestation", label: "Battlestation" },
-  { id: "collectibles", label: "Collectibles" }
+  { id: "collectibles", label: "Collectibles" },
+  { id: "watches", label: "Watches" }
 ];
 
 const COHORTS = [
   {
     id: "genz",
-    label: "Gen Z 15–25",
-    blurb: "Steals under $150, Jordan 1 Lows/Mids, viral colorways."
+    label: "Gen Z 15–24",
+    blurb: "Graphic hoodies, Jordan 1 Lows/Mids, viral colorways, bins under $150."
   },
   {
     id: "millennial",
-    label: "Millennials 25–35",
-    blurb: "Retro highs, Jordan 3/4/11 grails, value-tracking metrics."
+    label: "Millennials 25–34",
+    blurb: "Retro highs, denim collabs, Jordan 3/4/11 grails, value-tracking metrics."
   },
   {
     id: "og",
-    label: "OG Collectors 36–45",
-    blurb: "1985–1999 originals, deadstock grails, vintage provenance."
+    label: "OG Collectors 35–45",
+    blurb: "Heritage streetwear, 1985–1999 originals, deadstock grails, vintage provenance."
   }
 ] as const;
 
-function money(value?: string) {
-  const n = parseFloat(String(value ?? ""));
-  if (!Number.isFinite(n)) return "N/A";
-  return n.toLocaleString("en-US", { maximumFractionDigits: 2 });
-}
+const HUBS = [
+  { href: "/footwear/jordans/jordan-1", label: "Jordan 1" },
+  { href: "/footwear/jordans/jordan-4", label: "Jordan 4" },
+  { href: "/footwear/jordans/jordan-11", label: "Jordan 11" },
+  { href: "/footwear/travis-scott", label: "Travis Scott" },
+  { href: "/footwear/kobes", label: "Kobes" },
+  { href: "/footwear/nike-core", label: "Nike Core" },
+  { href: "/streetwear", label: "Streetwear / Denim" },
+  { href: "/watches/rolex", label: "Rolex" },
+  { href: "/watches/patek", label: "Patek" },
+  { href: "/watches/ap", label: "AP" },
+  { href: "/watches/richard-mille", label: "Richard Mille" },
+  { href: "/collectibles", label: "Cards & Memorabilia" }
+];
 
-function DealCard({
-  deal,
-  vaultIndex,
-  metric
-}: {
-  deal: Deal;
-  vaultIndex?: number;
-  metric?: "value" | "bin";
-}) {
-  const href = withEpn(deal.itemWebUrl);
-  const label = metric === "bin" ? "BUY IT NOW" : "CURRENT VALUE";
-  return (
-    <div className="relative group bg-neutral-900/90 border border-purple-500/30 rounded-2xl p-5 flex flex-col justify-between shadow-2xl hover:border-purple-500 transition-all duration-300 hover:-translate-y-1.5">
-      <div className="relative z-10">
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block h-56 bg-neutral-950 rounded-xl overflow-hidden mb-4 border border-neutral-800/80 flex items-center justify-center p-4 relative"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={imageUrl(deal)}
-            alt={deal.title}
-            className="h-full w-full object-contain group-hover:scale-105 transition duration-500"
-          />
-          {typeof vaultIndex === "number" ? (
-            <span className="absolute top-3 left-3 bg-purple-600 text-white text-[10px] font-black px-2.5 py-1 rounded-md tracking-wider uppercase shadow-md">
-              VAULT #{vaultIndex}
-            </span>
-          ) : (
-            <span className="absolute top-2 left-2 bg-black/80 text-emerald-400 text-[9px] font-bold px-2 py-0.5 rounded border border-emerald-500/30 uppercase">
-              VERIFIED
-            </span>
-          )}
-        </a>
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-bold text-base line-clamp-2 text-white hover:text-purple-400 transition leading-snug"
-        >
-          {deal.title}
-        </a>
-        {deal.soldAvg ? (
-          <p className="text-[10px] text-neutral-500 mt-2 uppercase tracking-wider">
-            Sold avg ${money(String(deal.soldAvg))}
-            {deal.discountPercent ? ` · ${deal.discountPercent}% under` : ""}
-          </p>
-        ) : null}
-      </div>
-      <div className="relative z-10 mt-6 pt-4 border-t border-neutral-800/80 flex items-center justify-between">
-        <div>
-          <span className="text-[10px] uppercase font-bold text-neutral-500 block">{label}</span>
-          <span className="text-xl font-black text-emerald-400">${money(deal.price?.value)}</span>
-        </div>
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-purple-600 hover:bg-purple-500 text-white text-xs font-black px-4 py-2.5 rounded-xl transition shadow-lg shadow-purple-600/30 uppercase tracking-wider"
-        >
-          View Drop
-        </a>
-      </div>
-    </div>
-  );
-}
+const SITE = "https://flipcultureusa.vercel.app/";
+const SHARE = encodeURIComponent(SITE);
+const SHARE_TEXT = encodeURIComponent("Flip Culture — sneakers, streetwear, collectibles, watches.");
 
 export default function HomeClient() {
   const [featured, setFeatured] = useState<Deal[]>([]);
   const [allDeals, setAllDeals] = useState<Deal[]>([]);
   const [catalog, setCatalog] = useState<Deal[]>([]);
-  const [category, setCategory] = useState("sneakers");
+  const [category, setCategory] = useState<CatalogCategory>("sneakers");
   const [query, setQuery] = useState("");
   const [submitted, setSubmitted] = useState("");
   const [loading, setLoading] = useState(true);
@@ -140,7 +84,11 @@ export default function HomeClient() {
           : `/api/deals?category=${category}`;
         const res = await fetch(url);
         const json = await res.json();
-        setCatalog(Array.isArray(json) ? json : []);
+        const rows: Deal[] = Array.isArray(json) ? json : [];
+        const wall = submitted
+          ? rows.filter((d) => classifyListing(d.title, d.category))
+          : rows.filter((d) => listingMatchesCategory(d.title, d.category, category));
+        setCatalog(wall);
       } catch (err) {
         console.error("Failed to load category deals:", err);
         setCatalog([]);
@@ -150,25 +98,30 @@ export default function HomeClient() {
     })();
   }, [category, submitted]);
 
-  const rarest = useMemo(
-    () => [...allDeals].sort((a, b) => parseFloat(b.price.value) - parseFloat(a.price.value)).slice(0, 4),
+  const consumerDeals = useMemo(
+    () => allDeals.filter((d) => Boolean(classifyListing(d.title, d.category))),
     [allDeals]
+  );
+  const rarest = useMemo(
+    () => [...consumerDeals].sort((a, b) => parseFloat(b.price.value) - parseFloat(a.price.value)).slice(0, 4),
+    [consumerDeals]
   );
   const cheapest = useMemo(
-    () => [...allDeals].sort((a, b) => parseFloat(a.price.value) - parseFloat(b.price.value)).slice(0, 4),
-    [allDeals]
+    () => [...consumerDeals].sort((a, b) => parseFloat(a.price.value) - parseFloat(b.price.value)).slice(0, 4),
+    [consumerDeals]
   );
   const cohortDeals = useMemo(() => {
-    const rows = allDeals.filter((d) => d.cohort === cohort);
+    const street = consumerDeals.filter((d) => listingMatchesCategory(d.title, d.category, "streetwear"));
+    const rows = (street.length ? street : consumerDeals).filter((d) => !d.cohort || d.cohort === cohort);
     if (cohort === "genz") {
       return rows
-        .filter((d) => parseFloat(d.price.value) < 150 || /low|mid/i.test(d.title))
+        .filter((d) => parseFloat(d.price.value) < 150 || /low|mid|hoodie|tee/i.test(d.title))
         .concat(rows)
         .filter((d, i, arr) => arr.findIndex((x) => x.itemId === d.itemId) === i)
         .slice(0, 4);
     }
     return rows.slice(0, 4);
-  }, [allDeals, cohort]);
+  }, [consumerDeals, cohort]);
 
   function onSearch(e: FormEvent) {
     e.preventDefault();
@@ -180,19 +133,14 @@ export default function HomeClient() {
       <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 p-2.5 text-center text-xs font-black uppercase tracking-widest flex justify-between px-6 items-center flex-wrap gap-2 shadow-md">
         <span className="flex items-center gap-2 mx-auto sm:mx-0">
           <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-          LIVE VAULT DROP: REAL-TIME MARKETPLACE STREAMING
+          LIVE VAULT DROP: SNEAKERS · STREETWEAR · COLLECTIBLES · WATCHES
         </span>
         <div className="flex gap-6 mx-auto sm:mx-0 font-bold">
           <Link href="/blog" className="hover:text-neutral-200 transition underline underline-offset-4">
             Legit Check Blog
           </Link>
-          <a
-            href="https://facebook.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-neutral-200 transition"
-          >
-            Facebook Hub
+          <a href="#about" className="hover:text-neutral-200 transition">
+            About
           </a>
         </div>
       </div>
@@ -213,7 +161,7 @@ export default function HomeClient() {
               FLIP CULTURE
             </h1>
             <p className="text-neutral-400 text-[10px] font-bold tracking-widest uppercase mt-0.5">
-              CURATED GRAILS • TECH • STREETWEAR
+              Sneakers · Streetwear · Collectibles · Watches
             </p>
           </div>
         </div>
@@ -232,6 +180,20 @@ export default function HomeClient() {
           </Link>
         </nav>
       </header>
+
+      <section className="max-w-7xl mx-auto px-6 pt-8">
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {HUBS.map((h) => (
+            <Link
+              key={h.href}
+              href={h.href}
+              className="shrink-0 px-3 py-1.5 rounded-full border border-neutral-800 text-[10px] font-bold uppercase tracking-wider text-neutral-400 hover:text-white hover:border-purple-500"
+            >
+              {h.label}
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <section id="hero-grid" className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -256,6 +218,20 @@ export default function HomeClient() {
             </div>
           </div>
         </div>
+      </section>
+
+      <section id="spotlight" className="max-w-7xl mx-auto px-6 pb-4">
+        <article className="relative aspect-video rounded-3xl overflow-hidden border border-neutral-800 bg-neutral-900">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-900 via-neutral-950 to-amber-900" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(168,85,247,0.35),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(251,191,36,0.2),transparent_40%)]" />
+          <div className="relative h-full flex flex-col justify-end p-8 md:p-12 max-w-3xl">
+            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-300">16:9 Editorial</span>
+            <h2 className="text-3xl md:text-5xl font-black mt-2">Four walls. One culture.</h2>
+            <p className="text-neutral-200 text-sm md:text-base mt-3">
+              Athletic footwear, age-true streetwear, sports cards & memorabilia, and watches from Submariners to Nautilus — never mixed, never tech.
+            </p>
+          </div>
+        </article>
       </section>
 
       <section id="featured" className="max-w-7xl mx-auto px-6 py-12">
@@ -313,7 +289,7 @@ export default function HomeClient() {
         <div className="text-center max-w-2xl mx-auto mb-10">
           <h2 className="text-3xl font-black tracking-tight mb-2">Explore The Live Catalog</h2>
           <p className="text-neutral-400 text-xs">
-            Query thousands of live marketplace listings with instant authenticity filters applied.
+            Four walls only: athletic sneakers, streetwear, sports collectibles, watches. Electronics never land here.
           </p>
         </div>
         <form onSubmit={onSearch} className="max-w-2xl mx-auto flex gap-3 mb-10">
@@ -321,7 +297,7 @@ export default function HomeClient() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search grails (e.g. 'Jordan 4', 'RTX 4090')..."
+            placeholder="Search grails (e.g. 'Jordan 4', 'Rolex Sub', 'Panini Prizm')..."
             className="w-full bg-neutral-900/90 border border-neutral-800 rounded-2xl px-5 py-4 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-purple-500 transition"
           />
           <button
@@ -331,10 +307,12 @@ export default function HomeClient() {
             Search
           </button>
         </form>
-        <div className="flex justify-center gap-3 mb-10 flex-wrap">
+        <div className="flex justify-center gap-3 mb-10 flex-wrap" role="tablist" aria-label="Live catalog categories">
           {CATEGORIES.map((c) => (
             <button
               key={c.id}
+              role="tab"
+              aria-selected={category === c.id && !submitted}
               onClick={() => {
                 setQuery("");
                 setSubmitted("");
@@ -356,14 +334,65 @@ export default function HomeClient() {
               <div key={i} className="h-80 bg-neutral-900/50 animate-pulse rounded-2xl border border-neutral-800/80" />
             ))}
           </div>
-        ) : (
+        ) : catalog.length ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {catalog.map((deal) => (
               <DealCard key={deal.itemId} deal={deal} metric="bin" />
             ))}
           </div>
+        ) : (
+          <div className="text-center border border-dashed border-neutral-800 rounded-3xl py-16 px-6">
+            <p className="text-sm font-bold uppercase tracking-widest text-neutral-300">
+              No live {category} in the feed yet
+            </p>
+            <p className="text-neutral-500 text-xs mt-2 max-w-md mx-auto">
+              The resale ingest is wiring {category}. We will not fill this wall with sneakers, tech, or placeholder SKUs.
+            </p>
+          </div>
         )}
       </section>
+
+      <section id="about" className="max-w-7xl mx-auto px-6 py-12 border-t border-neutral-800/80">
+        <span className="text-purple-400 font-bold text-xs uppercase tracking-widest">About Flip Culture</span>
+        <h2 className="text-3xl font-black mt-2 mb-4">A consumer desk for culture, not computers.</h2>
+        <p className="text-neutral-400 text-sm max-w-3xl leading-relaxed">
+          Flip Culture tracks live marketplace bins across four walls: athletic sneakers (Jordan 1–14, Kobes, Dunks, Yeezy
+          footwear), streetwear cut for 15–24 / 25–34 / 35–45, sports cards and game-used memorabilia, and watches from
+          daily Rolex Sub/Datejust and Omega through Patek Nautilus, AP Royal Oak, Richard Mille, and vintage Daytona.
+          Every View Drop button is eBay Partner Network tagged (campid 5339168299).
+        </p>
+      </section>
+
+      <section id="share" className="max-w-7xl mx-auto px-6 pb-4">
+        <div className="flex flex-wrap items-center gap-3 text-[10px] font-black uppercase tracking-widest">
+          <span className="text-neutral-500">Share</span>
+          <a
+            className="px-3 py-2 rounded-xl border border-neutral-800 hover:border-purple-500"
+            href={`https://twitter.com/intent/tweet?url=${SHARE}&text=${SHARE_TEXT}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            X
+          </a>
+          <a
+            className="px-3 py-2 rounded-xl border border-neutral-800 hover:border-purple-500"
+            href={`https://www.facebook.com/sharer/sharer.php?u=${SHARE}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Facebook
+          </a>
+          <button
+            type="button"
+            className="px-3 py-2 rounded-xl border border-neutral-800 hover:border-purple-500"
+            onClick={() => navigator.clipboard?.writeText(SITE)}
+          >
+            Copy link
+          </button>
+        </div>
+      </section>
+
+      <VipNewsletter />
 
       <footer className="border-t border-neutral-800/80 py-12 text-center text-neutral-500 text-xs">
         <p>© {new Date().getFullYear()} Flip Culture. All rights reserved. eBay Partner Network campaign 5339168299.</p>

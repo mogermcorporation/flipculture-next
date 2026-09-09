@@ -4,5 +4,6 @@ out
 .env*.local
 .DS_Store
 *.log
+tsconfig.tsbuildinfo
 .vercel
 .netlify

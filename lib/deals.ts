@@ -1,4 +1,5 @@
 import listingsSnapshot from "@/data/listings.json";
+import { classifyListing, listingMatchesCategory, type CatalogCategory } from "@/lib/classify";
 import type { CohortRow, Deal, ListingRow } from "@/lib/types";
 import { withEpn } from "@/lib/epn";
 
@@ -49,16 +50,8 @@ function itemWebUrl(ebayId: string, affiliate?: string | null, product?: string 
   }
 }
 
-function mapCategory(title: string, category?: string): string {
-  const t = title.toLowerCase();
-  const c = (category || "").toLowerCase();
-  if (c === "sneakers" || /jordan|dunk|yeezy|nike|sneaker/.test(t)) return "sneakers";
-  if (/hoodie|tee\b|streetwear|supreme|bape/.test(t) || c === "streetwear") return "streetwear";
-  if (/steam deck|rog ally|switch oled|handheld/.test(t)) return "handhelds";
-  if (/laptop|victus|strix|zephyrus|blade/.test(t) || c === "tech") return "laptops";
-  if (/rtx |gpu|headset|keyboard|battlestation/.test(t)) return "battlestation";
-  if (c === "luxury" || /rolex|watch|submariner|gmt/.test(t)) return "collectibles";
-  return c || "collectibles";
+function mapCategory(title: string, category?: string): string | null {
+  return classifyListing(title, category);
 }
 
 function isFeaturedRow(row: { featured?: boolean | null; hero_role?: string | null }): boolean {
@@ -88,6 +81,8 @@ function toDeal(opts: {
   if (value === "0.00") return null;
   const image = opts.image || "/logo.png";
   const web = itemWebUrl(ebayId, opts.affiliate, opts.product);
+  const category = mapCategory(title, opts.category);
+  if (!category) return null;
   return {
     itemId: browseItemId(ebayId || web),
     title,
@@ -96,7 +91,7 @@ function toDeal(opts: {
     image: { imageUrl: image },
     additionalImages: [],
     featured: Boolean(opts.featured),
-    category: mapCategory(title, opts.category),
+    category,
     cohort: opts.cohort,
     originalPrice: num(opts.soldAvg) || undefined,
     discountPercent: num(opts.discount) || undefined,
@@ -144,7 +139,7 @@ export async function loadAllDeals(): Promise<Deal[]> {
         image: row.image_url,
         affiliate: row.affiliate_url,
         product: row.product_url,
-        category: "sneakers",
+        category: row.kind || "sneakers",
         featured: isFeaturedRow(row),
         cohort: row.cohort || undefined,
         heroRole: row.hero_role,
@@ -195,7 +190,7 @@ export function filterDeals(
   deals: Deal[],
   opts: { featured?: boolean; q?: string; category?: string; cohort?: string }
 ): Deal[] {
-  let out = deals;
+  let out = deals.filter((d) => classifyListing(d.title, d.category));
   if (opts.q) {
     const q = opts.q.toLowerCase();
     return out.filter((d) => d.title.toLowerCase().includes(q));
@@ -209,7 +204,8 @@ export function filterDeals(
     return [...out].sort((a, b) => num(b.price.value) - num(a.price.value)).slice(0, 3);
   }
   if (opts.category) {
-    return out.filter((d) => d.category === opts.category);
+    const wanted = opts.category as CatalogCategory;
+    return out.filter((d) => listingMatchesCategory(d.title, d.category, wanted));
   }
   return out;
 }

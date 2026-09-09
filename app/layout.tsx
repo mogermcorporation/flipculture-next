@@ -2,24 +2,25 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Flip Culture | Curated Tech, Gaming, Streetwear & Everyday Deals",
+  title: "Flip Culture | Sneakers, Streetwear, Collectibles & Watches",
   description:
-    "Discover real-time verified active marketplace drops for deadstock sneakers, high-spec gaming laptops, retro tech, and rare streetwear grails.",
+    "Live marketplace bins for athletic sneakers, streetwear, sports cards & memorabilia, and watches. Dual grid: Rarest Grails vs Lowest BIN Deals.",
   authors: [{ name: "Flip Culture" }],
   keywords: [
     "Flip Culture",
     "Air Jordans",
     "Sneaker Resale",
-    "Gaming Laptops",
-    "Streetwear Grails",
-    "Yeezy Drops",
-    "ROG Zephyrus",
-    "Steam Deck OLED"
+    "Streetwear",
+    "Sports Cards",
+    "Rolex",
+    "Patek Philippe",
+    "Audemars Piguet",
+    "Yeezy"
   ],
   openGraph: {
-    title: "Flip Culture | Curated Tech, Gaming & Streetwear",
-    description: "Curated active drops for Jordans, Yeezys, ROG Gaming Laptops, and handheld gaming rigs.",
-    url: "https://flipculture.netlify.app",
+    title: "Flip Culture | Sneakers, Streetwear, Collectibles & Watches",
+    description: "Curated active drops for Jordans, streetwear, collectibles, and watches.",
+    url: "https://flipcultureusa.vercel.app",
     siteName: "Flip Culture",
     locale: "en_US",
     type: "website"

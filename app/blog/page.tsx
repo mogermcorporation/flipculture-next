@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Flip Culture Blog | Sourcing Guides, Legit Checks & Resale Trends",
   description:
-    "Deep dives into flipping Air Jordans, sourcing high-spec gaming laptops, spot-checking vintage streetwear, and maximizing resale margins."
+    "Deep dives into flipping Air Jordans, spotting vintage streetwear, sports cards, and watch market floors."
 };
 
 const POSTS = [
@@ -16,11 +16,11 @@ const POSTS = [
       "Crucial details on leather texture, heel shape, hourglass silhouettes, and Wings logo embossing before you buy or flip high-value pairs."
   },
   {
-    tag: "Tech Resale Analysis",
-    date: "August 2026",
-    title: "Top 5 Gaming Laptops That Hold Their Resale Value Best",
+    tag: "Watch Floors",
+    date: "September 2026",
+    title: "Rolex Sub vs Datejust vs Vintage Daytona: What the BIN Board Is Actually Paying",
     excerpt:
-      "Why ASUS ROG Zephyrus, Razer Blade, and Steam Deck OLED models consistently yield high margins on the secondary market."
+      "How we separate complete watches from parts, and why Patek Nautilus, AP Royal Oak, and Richard Mille sit on the most-valuable wall."
   },
   {
     tag: "Sourcing Strategy",
@@ -43,7 +43,7 @@ export default function BlogPage() {
         </Link>
         <h1 className="text-4xl font-black mt-6 mb-2">FLIP CULTURE BLOG</h1>
         <p className="text-neutral-400 text-sm mb-12">
-          Market trends, legit checks, hardware reviews, and sourcing breakdowns for high-value flips.
+          Market trends, legit checks, and sourcing breakdowns for sneakers, streetwear, collectibles, and watches.
         </p>
         <div className="space-y-8">
           {POSTS.map((post) => (
