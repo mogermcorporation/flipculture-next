@@ -1,26 +1,35 @@
 import HomeClient from "@/components/HomeClient";
 import JsonLd from "@/components/JsonLd";
 import { loadAllDeals } from "@/lib/deals";
+import { toCard } from "@/lib/journal";
 import { mixHero } from "@/lib/merchandise";
-import { itemListLd, pageMeta } from "@/lib/seo";
+import { getFeaturedPost, getJournalStrip } from "@/lib/posts";
+import { DEFAULT_DESC, DEFAULT_TITLE, itemListLd, pageMeta } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = pageMeta({
-  path: "/",
-  title: "Flip Culture | Sneakers, Streetwear, Collectibles & Watches",
-  description:
-    "Live marketplace bins for athletic sneakers, streetwear, sports cards & memorabilia, and watches. Dual grid: Rarest Grails vs Lowest BIN Deals."
-});
+export async function generateMetadata() {
+  const featured = getFeaturedPost();
+  return pageMeta({
+    path: "/",
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESC,
+    image: featured?.image || "/logo.png",
+    imageAlt: featured?.imageAlt || "Flip Culture journal"
+  });
+}
 
 export default async function Page() {
   const deals = await loadAllDeals();
   const { rarest, cheapest } = mixHero(deals);
+  const featuredPost = getFeaturedPost();
+  const featured = featuredPost ? toCard(featuredPost) : null;
+  const journal = getJournalStrip(featured?.slug);
   return (
     <>
       <JsonLd data={itemListLd("Rarest Grails", rarest)} />
       <JsonLd data={itemListLd("Lowest BIN Deals", cheapest)} />
-      <HomeClient />
+      <HomeClient featured={featured} journal={journal} />
     </>
   );
 }

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { POSTS } from "@/lib/posts";
 import type { Deal } from "@/lib/types";
 
 export const SITE_URL = "https://flipcultureusa.vercel.app";
@@ -13,24 +12,46 @@ export function canonicalFor(path: string): string {
   return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-export function pageMeta(opts: { path: string; title: string; description: string }): Metadata {
+export function absoluteAssetUrl(pathOrUrl: string): string {
+  if (!pathOrUrl) return `${SITE_URL}/logo.png`;
+  if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")) return pathOrUrl;
+  return `${SITE_URL}${pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`}`;
+}
+
+export function pageMeta(opts: {
+  path: string;
+  title: string;
+  description: string;
+  image?: string;
+  imageAlt?: string;
+  type?: "website" | "article";
+  publishedTime?: string;
+}): Metadata {
   const url = canonicalFor(opts.path);
+  const image = absoluteAssetUrl(opts.image || "/logo.png");
+  const imageAlt = opts.imageAlt || opts.title;
   return {
     title: opts.title,
     description: opts.description,
-    alternates: { canonical: url },
+    alternates: {
+      canonical: url,
+      types: { "application/rss+xml": `${SITE_URL}/rss.xml` }
+    },
     openGraph: {
       title: opts.title,
       description: opts.description,
       url,
       siteName: SITE_NAME,
       locale: "en_US",
-      type: "website"
+      type: opts.type || "website",
+      ...(opts.publishedTime ? { publishedTime: opts.publishedTime } : {}),
+      images: [{ url: image, width: 1200, height: 675, alt: imageAlt }]
     },
     twitter: {
       card: "summary_large_image",
       title: opts.title,
-      description: opts.description
+      description: opts.description,
+      images: [image]
     }
   };
 }
@@ -72,10 +93,60 @@ export function itemListLd(name: string, deals: Deal[]) {
   };
 }
 
+export function blogPostingLd(post: {
+  slug: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  author: string;
+  image: string;
+  imageAlt: string;
+}) {
+  const url = canonicalFor(`/blog/${post.slug}`);
+  const image = absoluteAssetUrl(post.image);
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt,
+    datePublished: post.date,
+    image: [image],
+    author: { "@type": "Person", name: post.author },
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` }
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    url
+  };
+}
+
+export function blogIndexLd(
+  posts: { slug: string; title: string; date: string; image: string }[]
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Flip Culture Blog",
+    url: canonicalFor("/blog"),
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: posts.map((post, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: canonicalFor(`/blog/${post.slug}`),
+        name: post.title,
+        image: absoluteAssetUrl(post.image),
+        datePublished: post.date
+      }))
+    }
+  };
+}
+
 export const SITEMAP_PATHS = [
   "/",
   "/blog",
-  ...POSTS.map((post) => `/blog/${post.slug}`),
   "/streetwear",
   "/streetwear/denim",
   "/streetwear/denim/true-religion",

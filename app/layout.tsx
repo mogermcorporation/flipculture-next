@@ -7,7 +7,9 @@ export const metadata: Metadata = {
   ...pageMeta({
     path: "/",
     title: DEFAULT_TITLE,
-    description: DEFAULT_DESC
+    description: DEFAULT_DESC,
+    image: "/logo.png",
+    imageAlt: "Flip Culture"
   }),
   metadataBase: new URL("https://flipcultureusa.vercel.app"),
   authors: [{ name: "Flip Culture" }],

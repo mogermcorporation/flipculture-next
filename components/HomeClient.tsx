@@ -19,7 +19,7 @@ import {
   listingWatchTier,
   mixHero
 } from "@/lib/merchandise";
-import { latestPosts } from "@/lib/posts";
+import type { JournalCard } from "@/lib/journal";
 import type { Deal } from "@/lib/types";
 
 const CATEGORIES: { id: CatalogCategory; label: string }[] = [
@@ -47,14 +47,19 @@ const SITE = "https://flipcultureusa.vercel.app/";
 const SHARE = encodeURIComponent(SITE);
 const SHARE_TEXT = encodeURIComponent("Flip Culture — sneakers, streetwear, collectibles, watches.");
 
-export default function HomeClient() {
+export default function HomeClient({
+  featured,
+  journal
+}: {
+  featured: JournalCard | null;
+  journal: JournalCard[];
+}) {
   const [allDeals, setAllDeals] = useState<Deal[]>([]);
   const [category, setCategory] = useState<CatalogCategory>("sneakers");
   const [rail, setRail] = useState<string>("all");
   const [query, setQuery] = useState("");
   const [submitted, setSubmitted] = useState("");
   const [loading, setLoading] = useState(true);
-  const journal = latestPosts(3);
 
   useEffect(() => {
     (async () => {
@@ -186,20 +191,35 @@ export default function HomeClient() {
           </div>
         </section>
 
-        <section id="spotlight" className="max-w-7xl mx-auto px-6 pb-4">
-          <article className="relative aspect-video rounded-3xl overflow-hidden border border-neutral-800 bg-neutral-900">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-900 via-neutral-950 to-amber-900" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(168,85,247,0.35),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(251,191,36,0.2),transparent_40%)]" />
-            <div className="relative h-full flex flex-col justify-end p-8 md:p-12 max-w-3xl">
-              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-300">16:9 Editorial</span>
-              <h2 className="text-3xl md:text-5xl font-black mt-2">Four walls. One culture.</h2>
-              <p className="text-neutral-200 text-sm md:text-base mt-3">
-                Athletic footwear, streetwear and denim by brand, sports cards & memorabilia, and watches from
-                Submariners to Nautilus — never mixed, never tech.
-              </p>
-            </div>
-          </article>
-        </section>
+        {featured?.image ? (
+          <section id="spotlight" className="max-w-7xl mx-auto px-6 pb-4">
+            <article className="relative aspect-video rounded-3xl overflow-hidden border border-neutral-800 bg-neutral-900">
+              <Link href={`/blog/${featured.slug}`} className="absolute inset-0 block group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={featured.image}
+                  alt={featured.imageAlt}
+                  width={1600}
+                  height={900}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/55 to-neutral-950/10" />
+                <div className="relative h-full flex flex-col justify-end p-8 md:p-12 max-w-3xl">
+                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-300">
+                    {featured.tags[0] || "Journal"}
+                  </span>
+                  <h2 className="text-3xl md:text-5xl font-black mt-2 group-hover:text-purple-200 transition">
+                    {featured.title}
+                  </h2>
+                  <p className="text-neutral-200 text-sm md:text-base mt-3 line-clamp-2">{featured.excerpt}</p>
+                  <time dateTime={featured.date} className="text-neutral-400 text-xs font-bold uppercase tracking-widest mt-4">
+                    {featured.dateLabel}
+                  </time>
+                </div>
+              </Link>
+            </article>
+          </section>
+        ) : null}
 
         <section id="featured" className="max-w-7xl mx-auto px-6 py-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
@@ -229,7 +249,7 @@ export default function HomeClient() {
                     className="w-full aspect-video object-cover rounded-xl border border-neutral-800 mb-4"
                   />
                   <p className="text-[10px] uppercase tracking-widest text-purple-400 font-bold">
-                    {post.tag} · {post.dateLabel}
+                    {(post.tags[0] || "Journal")} · <time dateTime={post.date}>{post.dateLabel}</time>
                   </p>
                   <h3 className="text-base font-black mt-2 mb-2 leading-snug group-hover:text-purple-300 transition">
                     {post.title}
