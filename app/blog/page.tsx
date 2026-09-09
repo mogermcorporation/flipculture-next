@@ -1,11 +1,15 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import SiteFooter from "@/components/SiteFooter";
+import SiteHeader from "@/components/SiteHeader";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
+  path: "/blog",
   title: "Flip Culture Blog | Sourcing Guides, Legit Checks & Resale Trends",
   description:
     "Deep dives into flipping Air Jordans, spotting vintage streetwear, sports cards, and watch market floors."
-};
+});
 
 const POSTS = [
   {
@@ -33,11 +37,9 @@ const POSTS = [
 
 export default function BlogPage() {
   return (
-    <main className="min-h-screen bg-neutral-950 text-white">
-      <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 p-2.5 text-center text-xs font-black uppercase tracking-widest">
-        Flip Culture Field Guides & Market Insights
-      </div>
-      <div className="max-w-3xl mx-auto px-6 py-16">
+    <div className="min-h-screen bg-neutral-950 text-white">
+      <SiteHeader brandAs="p" />
+      <main className="max-w-3xl mx-auto px-6 py-16">
         <Link href="/" className="text-purple-400 text-xs font-bold uppercase tracking-widest">
           Back to Storefront
         </Link>
@@ -56,7 +58,8 @@ export default function BlogPage() {
             </article>
           ))}
         </div>
-      </div>
-    </main>
+      </main>
+      <SiteFooter />
+    </div>
   );
 }

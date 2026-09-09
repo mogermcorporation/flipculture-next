@@ -18,19 +18,25 @@ export default function DealCard({
 }) {
   const href = withEpn(deal.itemWebUrl);
   const label = metric === "bin" ? "BUY IT NOW" : "CURRENT VALUE";
+  const src = imageUrl(deal);
   return (
-    <div className="relative group bg-neutral-900/90 border border-purple-500/30 rounded-2xl p-5 flex flex-col justify-between shadow-2xl hover:border-purple-500 transition-all duration-300 hover:-translate-y-1.5">
+    <article
+      data-wall={deal.category}
+      className="relative group bg-neutral-900/90 border border-purple-500/30 rounded-2xl p-5 flex flex-col justify-between shadow-2xl hover:border-purple-500 transition-all duration-300 hover:-translate-y-1.5"
+    >
       <div className="relative z-10">
         <a
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="block h-56 bg-neutral-950 rounded-xl overflow-hidden mb-4 border border-neutral-800/80 flex items-center justify-center p-4 relative"
+          className="block aspect-[4/3] bg-neutral-950 rounded-xl overflow-hidden mb-4 border border-neutral-800/80 flex items-center justify-center p-4 relative"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={imageUrl(deal)}
+            src={src}
             alt={deal.title}
+            width={480}
+            height={360}
             className="h-full w-full object-contain group-hover:scale-105 transition duration-500"
           />
           {typeof vaultIndex === "number" ? (
@@ -72,6 +78,6 @@ export default function DealCard({
           View Drop
         </a>
       </div>
-    </div>
+    </article>
   );
 }

@@ -14,6 +14,11 @@ export type Deal = {
   soldAvg?: number;
   condition?: string;
   authenticityGuarantee?: boolean;
+  family?: string;
+  apparel?: string;
+  denimBrand?: string;
+  collectibleKind?: string;
+  watchTier?: string;
 };
 
 export type ListingRow = {
@@ -27,6 +32,15 @@ export type ListingRow = {
   image_url?: string;
   source_platform?: string;
   currency?: string;
+  family?: string;
+  apparel?: string;
+  denim_brand?: string;
+  collectible_kind?: string;
+  tier?: string;
+  sneakers?: { family?: string };
+  streetwear?: { apparel?: string };
+  collectibles?: { kind?: string };
+  watches?: { tier?: string };
 };
 
 export type CohortRow = {
@@ -47,4 +61,9 @@ export type CohortRow = {
   condition?: string | null;
   featured?: boolean | null;
   hero_role?: string | null;
+  family?: string | null;
+  apparel?: string | null;
+  denim_brand?: string | null;
+  collectible_kind?: string | null;
+  tier?: string | null;
 };

@@ -1,5 +1,6 @@
 import listingsSnapshot from "@/data/listings.json";
 import { classifyListing, listingMatchesCategory, type CatalogCategory } from "@/lib/classify";
+import { resolveFacets } from "@/lib/merchandise";
 import type { CohortRow, Deal, ListingRow } from "@/lib/types";
 import { withEpn } from "@/lib/epn";
 
@@ -72,6 +73,15 @@ function toDeal(opts: {
   soldAvg?: unknown;
   discount?: unknown;
   condition?: string | null;
+  family?: string | null;
+  apparel?: string | null;
+  denim_brand?: string | null;
+  collectible_kind?: string | null;
+  tier?: string | null;
+  sneakers?: { family?: string | null };
+  streetwear?: { apparel?: string | null };
+  collectibles?: { kind?: string | null };
+  watches?: { tier?: string | null };
 }): Deal | null {
   const title = opts.title?.trim();
   if (!title) return null;
@@ -83,6 +93,7 @@ function toDeal(opts: {
   const web = itemWebUrl(ebayId, opts.affiliate, opts.product);
   const category = mapCategory(title, opts.category);
   if (!category) return null;
+  const facets = resolveFacets(title, opts);
   return {
     itemId: browseItemId(ebayId || web),
     title,
@@ -96,7 +107,12 @@ function toDeal(opts: {
     originalPrice: num(opts.soldAvg) || undefined,
     discountPercent: num(opts.discount) || undefined,
     soldAvg: num(opts.soldAvg) || undefined,
-    condition: opts.condition || undefined
+    condition: opts.condition || undefined,
+    family: facets.family,
+    apparel: facets.apparel,
+    denimBrand: facets.denimBrand,
+    collectibleKind: facets.collectibleKind,
+    watchTier: facets.watchTier
   };
 }
 
@@ -139,13 +155,18 @@ export async function loadAllDeals(): Promise<Deal[]> {
         image: row.image_url,
         affiliate: row.affiliate_url,
         product: row.product_url,
-        category: row.category || "sneakers",
+        category: row.category || row.kind || "sneakers",
         featured: isFeaturedRow(row),
         cohort: row.cohort || undefined,
         heroRole: row.hero_role,
         soldAvg: row.sold_avg,
         discount: row.discount_pct,
-        condition: row.condition
+        condition: row.condition,
+        family: row.family,
+        apparel: row.apparel,
+        denim_brand: row.denim_brand,
+        collectible_kind: row.collectible_kind,
+        tier: row.tier
       })
     )
     .filter((d): d is Deal => Boolean(d));
@@ -161,7 +182,16 @@ export async function loadAllDeals(): Promise<Deal[]> {
           image: row.image_url,
           affiliate: row.affiliate_url,
           category: row.category,
-          featured: i < 3
+          featured: i < 3,
+          family: row.family,
+          apparel: row.apparel,
+          denim_brand: row.denim_brand,
+          collectible_kind: row.collectible_kind,
+          tier: row.tier,
+          sneakers: row.sneakers,
+          streetwear: row.streetwear,
+          collectibles: row.collectibles,
+          watches: row.watches
         })
       )
       .filter((d): d is Deal => Boolean(d));
@@ -177,7 +207,16 @@ export async function loadAllDeals(): Promise<Deal[]> {
       image: row.image_url,
       affiliate: row.affiliate_url,
       category: row.category,
-      featured: false
+      featured: false,
+      family: row.family,
+      apparel: row.apparel,
+      denim_brand: row.denim_brand,
+      collectible_kind: row.collectible_kind,
+      tier: row.tier,
+      sneakers: row.sneakers,
+      streetwear: row.streetwear,
+      collectibles: row.collectibles,
+      watches: row.watches
     });
     if (!deal || seen.has(deal.itemId)) continue;
     seen.add(deal.itemId);
