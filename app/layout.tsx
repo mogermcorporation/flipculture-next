@@ -4,6 +4,7 @@ import { DEFAULT_DESC, DEFAULT_TITLE, organizationLd, pageMeta } from "@/lib/seo
 import "./globals.css";
 
 const GA_ID = "G-B61Q45GJTS";
+const METRICOOL_HASH = "7e5a8161d01d2ae3adb4816e90d022c9";
 
 export const metadata: Metadata = {
   ...pageMeta({
@@ -42,6 +43,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', '${GA_ID}');`,
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `function loadScript(a){var b=document.getElementsByTagName("head")[0],c=document.createElement("script");c.type="text/javascript",c.src="https://tracker.metricool.com/resources/be.js",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:"${METRICOOL_HASH}"})});`,
           }}
         />
       </head>
