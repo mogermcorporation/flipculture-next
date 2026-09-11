@@ -11,7 +11,7 @@ tags:
   - RTX-4080
 relatedWalls:
   - collectibles
-featured: true
+featured: false
 ---
 
 The 50-series already took the launch-window tax. What is left on the 4080 board is not last-gen junk. It is 12GB of Ada, 7424 CUDA cores, and chassis that originally printed between roughly $2,500 and $3,800. In September 2026 those same SKUs are the liquid mid-book: enough TGP to hold 1440p/1600p ultra, enough VRAM that you are not swapping textures in 2026 titles, and enough seller volume that you can actually exit.
