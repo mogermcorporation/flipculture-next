@@ -29,6 +29,7 @@ export const metadata: Metadata = {
     "Yeezy"
   ],
   robots: { index: true, follow: true },
+  verification: { google: "fLzFitsqvo79yVCufrRX4TDlI96-lD3lwseac-6uadI" },
   other: { "p:domain_verify": "f3dd95d73b9d9d5265bfb675d84b2cfd" }
 };
 
