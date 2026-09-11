@@ -28,7 +28,7 @@ export default async function JordanLinePage({ params }: { params: Promise<{ lin
       title={`Jordan ${n}`}
       blurb="Athletic footwear only — no apparel, cards, watches, or electronics."
       category="sneakers"
-      match={`jordan\\s?${n}\\b|air jordan\\s?${n}\\b`}
+      match={`(?:air )?jordan ${n}(?:[^0-9]|$)`}
     />
   );
 }

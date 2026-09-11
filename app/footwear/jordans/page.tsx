@@ -14,7 +14,7 @@ export default function JordansIndexPage() {
       title="Jordan 1–14"
       blurb="Athletic footwear only — Air Jordan 1 through 14. No apparel, cards, watches, or electronics."
       category="sneakers"
-      match="(?:air\\s*)?jordan\\s*(?:1[0-4]|[1-9])\\b"
+      match="(?:air )?jordan (?:1[0-4]|[1-9])(?:[^0-9]|$)"
     />
   );
 }
