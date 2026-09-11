@@ -41,14 +41,10 @@ function browseItemId(ebayId: string): string {
 }
 
 function itemWebUrl(ebayId: string, affiliate?: string | null, product?: string | null): string {
-  if (ebayId) return `https://www.ebay.com/itm/${ebayId}`;
-  const raw = affiliate || product || "https://www.ebay.com";
-  try {
-    const u = new URL(raw);
-    return `${u.origin}${u.pathname}`;
-  } catch {
-    return raw;
-  }
+  if (affiliate) return withEpn(affiliate);
+  if (ebayId) return withEpn(`https://www.ebay.com/itm/${ebayId}`);
+  if (product) return withEpn(product);
+  return withEpn("https://www.ebay.com");
 }
 
 function mapCategory(title: string, category?: string): string | null {

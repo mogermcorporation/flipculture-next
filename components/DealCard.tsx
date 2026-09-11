@@ -43,11 +43,7 @@ export default function DealCard({
             <span className="absolute top-3 left-3 bg-purple-600 text-white text-[10px] font-black px-2.5 py-1 rounded-md tracking-wider uppercase shadow-md">
               VAULT #{vaultIndex}
             </span>
-          ) : (
-            <span className="absolute top-2 left-2 bg-black/80 text-emerald-400 text-[9px] font-bold px-2 py-0.5 rounded border border-emerald-500/30 uppercase">
-              VERIFIED
-            </span>
-          )}
+          ) : null}
         </a>
         <a
           href={href}

@@ -1,14 +1,39 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { DealGrid, DenimBrandRails } from "@/components/CatalogRails";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { classifyListing, listingMatchesCategory, type CatalogCategory } from "@/lib/classify";
+import { loadAllDeals } from "@/lib/deals";
 import { listingApparel, listingDenimBrand } from "@/lib/merchandise";
 import type { Deal } from "@/lib/types";
 
-export default function HubClient({
+function compileMatch(match?: string): RegExp | null {
+  if (!match) return null;
+  try {
+    return new RegExp(match, "i");
+  } catch {
+    return null;
+  }
+}
+
+function dealKey(d: Deal): string {
+  const id = d.itemId.match(/(\d{6,})/)?.[1];
+  if (id) return id;
+  return `${d.title.trim().toLowerCase()}|${d.price?.value || ""}`;
+}
+
+function uniqueDeals(deals: Deal[]): Deal[] {
+  const seen = new Set<string>();
+  const out: Deal[] = [];
+  for (const d of deals) {
+    const key = dealKey(d);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(d);
+  }
+  return out;
+}
+
+export default async function HubClient({
   title,
   blurb,
   category,
@@ -23,34 +48,18 @@ export default function HubClient({
   denimOnly?: boolean;
   denimBrand?: string;
 }) {
-  const [rows, setRows] = useState<Deal[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const rx = match ? new RegExp(match, "i") : null;
-    (async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(`/api/deals?category=${category}`);
-        const json = await res.json();
-        const deals: Deal[] = Array.isArray(json) ? json : [];
-        setRows(
-          deals.filter((d) => {
-            if (!listingMatchesCategory(d.title, d.category, category)) return false;
-            if (!classifyListing(d.title, d.category)) return false;
-            if (denimOnly && listingApparel(d) !== "denim") return false;
-            if (denimBrand && listingDenimBrand(d) !== denimBrand) return false;
-            if (rx && !rx.test(d.title)) return false;
-            return true;
-          })
-        );
-      } catch {
-        setRows([]);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [category, match, denimOnly, denimBrand]);
+  const rx = compileMatch(match);
+  const deals = await loadAllDeals();
+  const rows = uniqueDeals(
+    deals.filter((d) => {
+      if (!listingMatchesCategory(d.title, d.category, category)) return false;
+      if (!classifyListing(d.title, d.category)) return false;
+      if (denimOnly && listingApparel(d) !== "denim") return false;
+      if (denimBrand && listingDenimBrand(d) !== denimBrand) return false;
+      if (rx && !rx.test(d.title)) return false;
+      return true;
+    })
+  );
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white">
@@ -59,13 +68,7 @@ export default function HubClient({
         <div className="max-w-7xl mx-auto">
           <h1 className="text-4xl font-black">{title}</h1>
           <p className="text-neutral-400 text-sm mt-2 mb-10 max-w-2xl">{blurb}</p>
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="h-80 bg-neutral-900/50 animate-pulse rounded-2xl" />
-              ))}
-            </div>
-          ) : rows.length ? (
+          {rows.length ? (
             denimOnly && !denimBrand ? (
               <DenimBrandRails deals={rows} />
             ) : (

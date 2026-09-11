@@ -18,13 +18,13 @@ const HOUSES: Record<string, { title: string; match: string; blurb: string; desc
   },
   ap: {
     title: "Audemars Piguet",
-    match: "audemars|piguet|royal oak|\\bap\\b",
+    match: "audemars|piguet|royal oak|(?:^|[^a-z0-9])ap(?:[^a-z0-9]|$)",
     blurb: "Royal Oak and AP references. Watches only.",
     description: "Live Audemars Piguet bins — Royal Oak and AP references."
   },
   "richard-mille": {
     title: "Richard Mille",
-    match: "richard mille|\\brm[- ]?\\d",
+    match: "richard mille|rm[- ]?[0-9]",
     blurb: "Richard Mille — most-valuable watch wall.",
     description: "Live Richard Mille bins — RM references, complete watches only."
   }
